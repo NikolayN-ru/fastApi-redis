@@ -1,44 +1,69 @@
-import aioredis
-import asyncio
 from fastapi import Body, FastAPI
 from typing import List, Optional
-import datetime
 import redis
+import datetime, time
 
-now = datetime.datetime.now()
 app = FastAPI()
 
+
+def linkRename(link):
+    return link.split('//')[-1].split('?')[0]
+
+
 @app.post("/visited_links")
-async def update_item(*, links: List[str] = Body(..., embed=True)):
-    results = {"links": links}
-    linksArray = results["links"]
-    array = []
-    linksArray = [array.append({"link": i, "time": now.strftime("%Y-%m-%d %H:%M:%S")}) for i in linksArray]
-    print(array)
-    return (results)
+async def update_item(from1: int = 0, to: int = 0, links: List[str] = Body(..., embed=True)):
+    print(from1, to, 'query - question')
+    redis_client = redis.Redis(host='docker.for.mac.localhost', port=6379, db=0)
+    sec = time.time()
+    if redis_client.get('links'):
+        oldLinks = redis_client.get('links')
+        newLinks = str(oldLinks)
+        arr = []
+        oldTime = []
+        for i in range(len(newLinks.split('link'))):
+            arr.append(newLinks.split('link')[i].split(',')[0][6:-2])
+            oldTime.append(newLinks.split('time')[i].split(',')[0].split('}')[0][4:])
+        print(oldTime[1:])
+        print(arr[1:])
+        results = {"links": links}
+        linksArray = results["links"]
+        for i in linksArray:
+            if linkRename(i) in arr:
+                pass
+            else:
+                arr.append(i)
+                oldTime.append(round(sec))
+        redis_client = redis.Redis(host='docker.for.mac.localhost', port=6379, db=0)
+        lastArr = []
+        for i in range(len(arr)):
+            print(i)
+            lastArr.append({"link": arr[i], "time": oldTime[i]})
+        print('lastArr', lastArr)
+        redis_client.set('links', lastArr), 'set'
+        return arr[1:]
+    else:
+        results = {"links": links}
+        linksArray = results["links"]
+        array = []
+        [array.append({"link": linkRename(i), "time": round(sec)}) for i in linksArray]
+        newArr = []
+        for i in array:
+            newArr.append(str(i))
+        liksStr = (str(newArr))
+        redis_client = redis.Redis(host='docker.for.mac.localhost', port=6379, db=0)
+        redis_client.set('links', liksStr), 'set'
+        return array
 
 
-# class Service:
-#     def __init__(self, redis: Redis) -> None:
-#         self._redis = redis
-#
-#     async def process(self) -> str:
-#         await self._redis.set("my-key", "value")
-#         return await self._redis.get("my-key", encoding="utf-8")
-
-
-@app.post('/redis')
-async def redisTest():
-    r = redis.StrictRedis(host='localhost', port=6379, db=0)
-    r.lpush('myqueue', 'myelement')
-    return ('wwwdw')
-
-
-@app.get('/api/{city}')
-async def weather(city: str):
-    redis = await aioredis.create_redis(address=('redis', 6379))
-    cache = await redis.get(city)
-    if cache is not None:
-        return {'city': city, 'temperature': cache, 'source': 'cache'}
-    await redis.set(city)
-    return {'city': city, 'source': 'pogoda.mail.ru'}
+@app.get('/visited_domains')
+def redisTest():
+    redis_client = redis.Redis(host='docker.for.mac.localhost', port=6379, db=0)
+    if redis_client.get('links'):
+        oldLinks = redis_client.get('links')
+        newLinks = str(oldLinks)
+        arr = []
+        for i in range(len(newLinks.split('link'))):
+            arr.append(newLinks.split('link')[i].split(',')[0][6:-2])
+        return arr[1:]
+    newArr = []
+    return newArr
