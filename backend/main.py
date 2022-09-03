@@ -16,31 +16,32 @@ async def update_item(from1: int = 0, to: int = 0, links: List[str] = Body(..., 
     redis_client = redis.Redis(host='docker.for.mac.localhost', port=6379, db=0)
     sec = time.time()
     if redis_client.get('links'):
-        oldLinks = redis_client.get('links')
-        newLinks = str(oldLinks)
-        arr = []
-        oldTime = []
-        for i in range(len(newLinks.split('link'))):
-            arr.append(newLinks.split('link')[i].split(',')[0][6:-2])
-            oldTime.append(newLinks.split('time')[i].split(',')[0].split('}')[0][4:])
-        print(oldTime[1:])
-        print(arr[1:])
-        results = {"links": links}
-        linksArray = results["links"]
-        for i in linksArray:
-            if linkRename(i) in arr:
-                pass
-            else:
-                arr.append(i)
-                oldTime.append(round(sec))
-        redis_client = redis.Redis(host='docker.for.mac.localhost', port=6379, db=0)
-        lastArr = []
-        for i in range(len(arr)):
-            print(i)
-            lastArr.append({"link": arr[i], "time": oldTime[i]})
-        print('lastArr', lastArr)
-        redis_client.set('links', lastArr), 'set'
-        return arr[1:]
+        pass
+        # oldLinks = redis_client.get('links')
+        # newLinks = str(oldLinks)
+        # arr = []
+        # oldTime = []
+        # for i in range(len(newLinks.split('link'))):
+        #     arr.append(newLinks.split('link')[i].split(',')[0][6:-2])
+        #     oldTime.append(newLinks.split('time')[i].split(',')[0].split('}')[0][4:])
+        # print(oldTime[1:])
+        # print(arr[1:])
+        # results = {"links": links}
+        # linksArray = results["links"]
+        # for i in linksArray:
+        #     if linkRename(i) in arr:
+        #         pass
+        #     else:
+        #         arr.append(i)
+        #         oldTime.append(round(sec))
+        # redis_client = redis.Redis(host='docker.for.mac.localhost', port=6379, db=0)
+        # lastArr = []
+        # for i in range(len(arr)):
+        #     print(i)
+        #     lastArr.append({"link": arr[i], "time": oldTime[i]})
+        # print('lastArr', lastArr)
+        # redis_client.set('links', lastArr), 'set'
+        # return arr[1:]
     else:
         results = {"links": links}
         linksArray = results["links"]
